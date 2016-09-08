@@ -81,3 +81,33 @@ def calculate_cost(X_and_theta, ratings, did_rate, num_users, num_movies, num_fe
 	# '**' means an element-wise power
 	regularization = (reg_param / 2) * (sum( theta**2 ) + sum(X**2))
 	return cost + regularization
+
+	
+from scipy import optimize
+# regularization paramater
+
+reg_param = 30
+
+
+# perform gradient descent, find the minimum cost (sum of squared errors) and optimal values of X (movie_features) and Theta (user_prefs)
+
+minimized_cost_and_optimal_params = optimize.fmin_cg(calculate_cost, fprime=calculate_gradient, x0=initial_X_and_theta, 								args=(ratings, did_rate, num_users, num_movies, num_features, reg_param), 								maxiter=100, disp=True, full_output=True ) 
+
+
+cost, optimal_movie_features_and_user_prefs = minimized_cost_and_optimal_params[1], minimized_cost_and_optimal_params[0]
+
+
+# unroll once again
+
+movie_features, user_prefs = unroll_params(optimal_movie_features_and_user_prefs, num_users, num_movies, num_features)
+
+
+# Make some predictions (movie recommendations). Dot product
+
+all_predictions = movie_features.dot( user_prefs.T )
+
+
+# add back the ratings_mean column vector to my (our) predictions
+
+predictions_for_me = all_predictions[:, 0:1] + ratings_mean
+
